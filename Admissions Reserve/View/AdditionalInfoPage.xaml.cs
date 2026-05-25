@@ -540,9 +540,9 @@ namespace Admissions_Reserve.View
                 {
                     DataService.CreateApplicantLanguage(
                         applicantId, 
-                        langVM.LanguageId ?? 0, 
-                        langVM.LevelId ?? 0, 
-                        langVM.IsPrimary ?? false);
+                        langVM.LanguageId.GetValueOrDefault(), 
+                        langVM.LevelId.GetValueOrDefault(), 
+                        langVM.IsPrimary.GetValueOrDefault());
                 }
             }
         }
@@ -836,6 +836,7 @@ namespace Admissions_Reserve.View
         {
             public int Id { get; set; }
             public string SportType { get; set; }
+            public string Achievement { get; set; }
             public string Rank { get; set; }
             public int? Year { get; set; }
         }

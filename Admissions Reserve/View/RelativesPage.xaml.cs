@@ -514,23 +514,13 @@ namespace Admissions_Reserve.View
                     if (relative.Id == 0)
                     {
                         // Новый родственник - создаем запись
-                        var newRelative = new Relatives
-                        {
-                            ApplicantId = SessionManager.CurrentApplicantId.Value,
-                            LastName = relative.LastName ?? "",
-                            FirstName = relative.FirstName ?? "",
-                            Patronymic = relative.Patronymic ?? "",
-                            CreatedAt = DateTime.Now,
-                            UpdatedAt = DateTime.Now
-                        };
-                        
                         var newId = DataService.CreateRelative(
-                            newRelative.ApplicantId,
+                            SessionManager.CurrentApplicantId.GetValueOrDefault(),
                             relative.Inn ?? "",
                             relative.RelationDegree ?? "",
-                            newRelative.LastName,
-                            newRelative.FirstName,
-                            newRelative.Patronymic,
+                            relative.LastName ?? "",
+                            relative.FirstName ?? "",
+                            relative.Patronymic ?? "",
                             relative.BirthDate,
                             relative.Phone ?? "",
                             relative.Email ?? "",

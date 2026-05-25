@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using Admissions_Reserve.Model;
 
 namespace Admissions_Reserve.View
 {
