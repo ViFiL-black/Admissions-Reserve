@@ -755,6 +755,29 @@ namespace Admissions_Reserve.Model
             }
         }
 
+        public static void UpdateApplicantLanguage(ApplicantLanguages language)
+        {
+            using (var connection = DatabaseHelper.GetConnection())
+            {
+                var query = @"UPDATE ApplicantLanguages SET 
+                    LanguageId = @LanguageId,
+                    LanguageLevelId = @LanguageLevelId,
+                    IsPrimary = @IsPrimary,
+                    UpdatedAt = @UpdatedAt
+                WHERE Id = @Id";
+
+                using (var cmd = new SQLiteCommand(query, connection))
+                {
+                    cmd.Parameters.AddWithValue("@Id", language.Id);
+                    cmd.Parameters.AddWithValue("@LanguageId", (object)language.LanguageId ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@LanguageLevelId", (object)language.LanguageLevelId ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@IsPrimary", (object)language.IsPrimary ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@UpdatedAt", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
         // ========== МЕТОДЫ ДЛЯ СПОРТИВНЫХ ДОСТИЖЕНИЙ ==========
 
         public static int CreateSportAchievement(int applicantId, string sportType, string achievement, string rank, int? year)
@@ -825,6 +848,31 @@ namespace Admissions_Reserve.Model
             }
         }
 
+        public static void UpdateSportAchievement(SportAchievements achievement)
+        {
+            using (var connection = DatabaseHelper.GetConnection())
+            {
+                var query = @"UPDATE SportAchievements SET 
+                    SportType = @SportType,
+                    Achievement = @Achievement,
+                    Rank = @Rank,
+                    Year = @Year,
+                    UpdatedAt = @UpdatedAt
+                WHERE Id = @Id";
+
+                using (var cmd = new SQLiteCommand(query, connection))
+                {
+                    cmd.Parameters.AddWithValue("@Id", achievement.Id);
+                    cmd.Parameters.AddWithValue("@SportType", (object)achievement.SportType ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Achievement", (object)achievement.Achievement ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Rank", (object)achievement.Rank ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Year", (object)achievement.Year ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@UpdatedAt", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
         // ========== МЕТОДЫ ДЛЯ ИНДИВИДУАЛЬНЫХ ДОСТИЖЕНИЙ ==========
 
         public static int CreateIndividualAchievement(int applicantId, string achievement)
@@ -884,6 +932,25 @@ namespace Admissions_Reserve.Model
                 using (var cmd = new SQLiteCommand(query, connection))
                 {
                     cmd.Parameters.AddWithValue("@Id", achievementId);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public static void UpdateIndividualAchievement(IndividualAchievements achievement)
+        {
+            using (var connection = DatabaseHelper.GetConnection())
+            {
+                var query = @"UPDATE IndividualAchievements SET 
+                    Achievement = @Achievement,
+                    UpdatedAt = @UpdatedAt
+                WHERE Id = @Id";
+
+                using (var cmd = new SQLiteCommand(query, connection))
+                {
+                    cmd.Parameters.AddWithValue("@Id", achievement.Id);
+                    cmd.Parameters.AddWithValue("@Achievement", (object)achievement.Achievement ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@UpdatedAt", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
                     cmd.ExecuteNonQuery();
                 }
             }
