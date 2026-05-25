@@ -213,9 +213,20 @@ namespace Admissions_Reserve.Model
     {
         public int Id { get; set; }
         public int? ApplicantId { get; set; }
+        public string Inn { get; set; }
+        public string RelationDegree { get; set; }
         public string LastName { get; set; }
         public string FirstName { get; set; }
         public string Patronymic { get; set; }
+        public DateTime? BirthDate { get; set; }
+        public string Phone { get; set; }
+        public string Email { get; set; }
+        public string WorkPlace { get; set; }
+        public string Position { get; set; }
+        public bool? IsBlocked { get; set; }
+        public string BlockReason { get; set; }
+        public DateTime? CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
     }
 
     // ========== ВСПОМОГАТЕЛЬНЫЕ КЛАССЫ ==========

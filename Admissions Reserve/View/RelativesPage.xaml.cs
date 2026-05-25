@@ -543,6 +543,20 @@ namespace Admissions_Reserve.View
                     else
                     {
                         // Существующий родственник - обновляем запись
+                        DataService.UpdateRelative(
+                            relative.Id,
+                            SessionManager.CurrentApplicantId.Value,
+                            relative.Inn ?? "",
+                            relative.RelationDegree ?? "",
+                            relative.LastName ?? "",
+                            relative.FirstName ?? "",
+                            relative.Patronymic ?? "",
+                            relative.BirthDate,
+                            relative.Phone ?? "",
+                            relative.Email ?? "",
+                            relative.WorkPlace ?? "",
+                            relative.Position ?? ""
+                        );
                         DataService.LogChange("Relatives", relative.Id, "UPDATE");
                     }
                 }

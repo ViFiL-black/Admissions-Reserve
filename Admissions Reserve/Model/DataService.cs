@@ -687,6 +687,48 @@ namespace Admissions_Reserve.Model
             }
         }
 
+        public static void UpdateRelative(int id, int applicantId, string inn, string relationDegree, string lastName, 
+                                          string firstName, string patronymic, DateTime? birthDate, string phone, 
+                                          string email, string workplace, string position)
+        {
+            using (var connection = DatabaseHelper.GetConnection())
+            {
+                var query = @"UPDATE Relatives SET 
+                    ApplicantId = @ApplicantId,
+                    Inn = @Inn,
+                    RelationDegree = @RelationDegree,
+                    LastName = @LastName,
+                    FirstName = @FirstName,
+                    Patronymic = @Patronymic,
+                    BirthDate = @BirthDate,
+                    Phone = @Phone,
+                    Email = @Email,
+                    WorkPlace = @WorkPlace,
+                    Position = @Position,
+                    UpdatedAt = @UpdatedAt
+                WHERE Id = @Id";
+
+                using (var cmd = new SQLiteCommand(query, connection))
+                {
+                    cmd.Parameters.AddWithValue("@Id", id);
+                    cmd.Parameters.AddWithValue("@ApplicantId", applicantId);
+                    cmd.Parameters.AddWithValue("@Inn", (object)inn ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@RelationDegree", (object)relationDegree ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@LastName", (object)lastName ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@FirstName", (object)firstName ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Patronymic", (object)patronymic ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@BirthDate", (object)birthDate?.ToString("yyyy-MM-dd") ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Phone", (object)phone ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Email", (object)email ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@WorkPlace", (object)workplace ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Position", (object)position ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@UpdatedAt", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
         // ========== МЕТОДЫ ДЛЯ ЯЗЫКОВ АБИТУРИЕНТА ==========
 
         public static int CreateApplicantLanguage(int applicantId, int languageId, int languageLevelId, bool isPrimary = false)
