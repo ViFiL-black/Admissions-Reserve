@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using Admissions_Reserve.Model;
 
 namespace Admissions_Reserve.View
 {
@@ -13,6 +14,7 @@ namespace Admissions_Reserve.View
         // Модель родственника
         public class RelativeItem : INotifyPropertyChanged
         {
+            public int Id { get; set; }
             private int _number;
             private string _inn;
             private string _relationDegree;
@@ -102,12 +104,14 @@ namespace Admissions_Reserve.View
         private ObservableCollection<RelativeItem> _blockedRelatives;
         private int _nextNumber = 1;
         private RelativeItem _selectedRelative;
+        private bool isInitialized = false;
 
         public RelativesPage()
         {
             InitializeComponent();
             InitializeData();
             InitializeEvents();
+            isInitialized = true;
         }
 
         private void InitializeData()
@@ -115,22 +119,61 @@ namespace Admissions_Reserve.View
             _regularRelatives = new ObservableCollection<RelativeItem>();
             _blockedRelatives = new ObservableCollection<RelativeItem>();
 
-            LoadSampleData();
+            // Загружаем данные из БД если есть абитуриент
+            if (SessionManager.CurrentApplicant != null)
+            {
+                LoadRelativesFromDatabase();
+            }
+            else
+            {
+                LoadSampleData();
+            }
 
             RegularRelativesGrid.ItemsSource = _regularRelatives;
             BlockedRelativesGrid.ItemsSource = _blockedRelatives;
         }
 
+        private void LoadRelativesFromDatabase()
+        {
+            try
+            {
+                var relatives = DataService.GetApplicantRelatives(SessionManager.CurrentApplicantId.Value);
+                foreach (var relative in relatives)
+                {
+                    var item = new RelativeItem
+                    {
+                        Id = relative.Id,
+                        Number = _nextNumber++,
+                        LastName = relative.LastName,
+                        FirstName = relative.FirstName,
+                        Patronymic = relative.Patronymic
+                    };
+                    _regularRelatives.Add(item);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка загрузки данных: {ex.Message}", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                LoadSampleData();
+            }
+        }
+
+        private void LoadSampleData()
+        {
+            // Пустой список для новых абитуриентов
+        }
+
         private void InitializeEvents()
         {
             // Форматирование телефона
-            PhoneTextBox.TextChanged += (s, e) => FormatPhoneNumber(PhoneTextBox);
+            PhoneTextBox.TextChanged += (s, e) => { if (isInitialized) FormatPhoneNumber(PhoneTextBox); };
 
             // Валидация email
-            EmailTextBox.LostFocus += (s, e) => ValidateEmail(EmailTextBox);
+            EmailTextBox.LostFocus += (s, e) => { if (isInitialized) ValidateEmail(EmailTextBox); };
 
             // Автоматическое форматирование ИНН
-            InnTextBox.TextChanged += (s, e) => FormatInn(InnTextBox);
+            InnTextBox.TextChanged += (s, e) => { if (isInitialized) FormatInn(InnTextBox); };
         }
 
         private void FormatPhoneNumber(TextBox textBox)
@@ -202,49 +245,17 @@ namespace Admissions_Reserve.View
             }
         }
 
-        private void LoadSampleData()
-        {
-            _regularRelatives.Add(new RelativeItem
-            {
-                Number = _nextNumber++,
-                Inn = "123456789012",
-                RelationDegree = "Отец",
-                LastName = "Иванов",
-                FirstName = "Петр",
-                Patronymic = "Сергеевич",
-                BirthDate = new DateTime(1975, 5, 15),
-                Phone = "+7 (912) 345-67-89",
-                Email = "petr.ivanov@example.ru",
-                WorkPlace = "ООО \"Ромашка\"",
-                Position = "Директор",
-                IsBlocked = false
-            });
-
-            _regularRelatives.Add(new RelativeItem
-            {
-                Number = _nextNumber++,
-                Inn = "987654321098",
-                RelationDegree = "Мать",
-                LastName = "Иванова",
-                FirstName = "Елена",
-                Patronymic = "Алексеевна",
-                BirthDate = new DateTime(1978, 8, 22),
-                Phone = "+7 (912) 345-67-90",
-                Email = "elena.ivanova@example.ru",
-                WorkPlace = "ГБОУ Школа №123",
-                Position = "Учитель",
-                IsBlocked = false
-            });
-        }
-
         private void RegularRelativesGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (!isInitialized) return;
             _selectedRelative = RegularRelativesGrid.SelectedItem as RelativeItem;
             BlockSelectedButton.IsEnabled = _selectedRelative != null;
         }
 
         private void AddRelativeButton_Click(object sender, RoutedEventArgs e)
         {
+            if (!isInitialized) return;
+
             // Проверка обязательных полей
             if (string.IsNullOrWhiteSpace(LastNameTextBox.Text))
             {
@@ -262,21 +273,6 @@ namespace Admissions_Reserve.View
                 return;
             }
 
-            if (IdTypeCombo.SelectedItem == null)
-            {
-                MessageBox.Show("Пожалуйста, укажите тип удостоверения", "Ошибка",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(IdNumberTextBox.Text))
-            {
-                MessageBox.Show("Пожалуйста, укажите номер удостоверения", "Ошибка",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
-                IdNumberTextBox.Focus();
-                return;
-            }
-
             if (BirthDatePicker.SelectedDate == null)
             {
                 MessageBox.Show("Пожалуйста, укажите дату рождения", "Ошибка",
@@ -284,27 +280,56 @@ namespace Admissions_Reserve.View
                 return;
             }
 
-            var newRelative = new RelativeItem
+            try
             {
-                Number = _nextNumber++,
-                Inn = InnTextBox.Text,
-                RelationDegree = (RelationDegreeCombo.SelectedItem as ComboBoxItem)?.Content.ToString(),
-                LastName = LastNameTextBox.Text,
-                FirstName = FirstNameTextBox.Text,
-                Patronymic = PatronymicTextBox.Text,
-                BirthDate = BirthDatePicker.SelectedDate,
-                Phone = PhoneTextBox.Text,
-                Email = EmailTextBox.Text,
-                WorkPlace = WorkPlaceTextBox.Text,
-                Position = PositionTextBox.Text,
-                IsBlocked = false
-            };
+                int relativeId = 0;
+                if (SessionManager.CurrentApplicant != null)
+                {
+                    relativeId = DatabasePersistenceHelper.SaveRelativeDocument(
+                        SessionManager.CurrentApplicantId.Value,
+                        (RelationDegreeCombo.SelectedItem as ComboBoxItem)?.Content.ToString(),
+                        LastNameTextBox.Text?.Trim(),
+                        FirstNameTextBox.Text?.Trim(),
+                        PatronymicTextBox.Text?.Trim(),
+                        BirthDatePicker.SelectedDate,
+                        PhoneTextBox.Text?.Trim(),
+                        EmailTextBox.Text?.Trim(),
+                        WorkPlaceTextBox.Text?.Trim(),
+                        PositionTextBox.Text?.Trim(),
+                        "",
+                        false
+                    );
+                    DataService.LogChange("RelativeDocuments", relativeId, "INSERT");
+                }
 
-            _regularRelatives.Add(newRelative);
-            ClearForm();
+                var newRelative = new RelativeItem
+                {
+                    Id = relativeId,
+                    Number = _nextNumber++,
+                    Inn = InnTextBox.Text,
+                    RelationDegree = (RelationDegreeCombo.SelectedItem as ComboBoxItem)?.Content.ToString(),
+                    LastName = LastNameTextBox.Text,
+                    FirstName = FirstNameTextBox.Text,
+                    Patronymic = PatronymicTextBox.Text,
+                    BirthDate = BirthDatePicker.SelectedDate,
+                    Phone = PhoneTextBox.Text,
+                    Email = EmailTextBox.Text,
+                    WorkPlace = WorkPlaceTextBox.Text,
+                    Position = PositionTextBox.Text,
+                    IsBlocked = false
+                };
 
-            MessageBox.Show("Родственник успешно добавлен", "Успех",
-                MessageBoxButton.OK, MessageBoxImage.Information);
+                _regularRelatives.Add(newRelative);
+                ClearForm();
+
+                MessageBox.Show("Родственник успешно добавлен", "Успех",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при сохранении: {ex.Message}", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void EditRelative_Click(object sender, RoutedEventArgs e)
@@ -369,6 +394,8 @@ namespace Admissions_Reserve.View
 
         private void DeleteRegularRelative_Click(object sender, RoutedEventArgs e)
         {
+            if (!isInitialized) return;
+
             var button = sender as Button;
             var item = button?.Tag as RelativeItem;
 
@@ -379,14 +406,33 @@ namespace Admissions_Reserve.View
 
                 if (result == MessageBoxResult.Yes)
                 {
-                    _regularRelatives.Remove(item);
-                    RenumberItems(_regularRelatives);
+                    try
+                    {
+                        if (item.Id > 0 && SessionManager.CurrentApplicant != null)
+                        {
+                            DatabasePersistenceHelper.DeleteRelativeDocument(item.Id, SessionManager.CurrentApplicantId.Value);
+                            DataService.LogChange("RelativeDocuments", item.Id, "DELETE");
+                        }
+
+                        _regularRelatives.Remove(item);
+                        RenumberItems(_regularRelatives);
+
+                        MessageBox.Show("Родственник удален", "Успех",
+                            MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Ошибка при удалении: {ex.Message}", "Ошибка",
+                            MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                 }
             }
         }
 
         private void BlockSelectedButton_Click(object sender, RoutedEventArgs e)
         {
+            if (!isInitialized) return;
+
             if (_selectedRelative == null)
             {
                 MessageBox.Show("Пожалуйста, выберите родственника для блокировки",
@@ -415,6 +461,8 @@ namespace Admissions_Reserve.View
 
         private void UnblockRelative_Click(object sender, RoutedEventArgs e)
         {
+            if (!isInitialized) return;
+
             var button = sender as Button;
             var item = button?.Tag as RelativeItem;
 

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
+using Admissions_Reserve.Model;
 
 namespace Admissions_Reserve.View
 {
@@ -13,6 +14,7 @@ namespace Admissions_Reserve.View
         // Модель документа
         public class AttachedDocument : INotifyPropertyChanged
         {
+            public int Id { get; set; }
             private int _number;
             private string _documentType;
             private string _seriesNumber;
@@ -95,52 +97,53 @@ namespace Admissions_Reserve.View
         {
             _documents = new ObservableCollection<AttachedDocument>();
 
-            // Добавляем пример данных
-            LoadSampleDocuments();
+            // Загружаем данные из БД если есть абитуриент
+            if (SessionManager.CurrentApplicant != null)
+            {
+                LoadDocumentsFromDatabase();
+            }
+            else
+            {
+                LoadSampleDocuments();
+            }
 
             DocumentsGrid.ItemsSource = _documents;
         }
 
+        private void LoadDocumentsFromDatabase()
+        {
+            try
+            {
+                var documents = DatabasePersistenceHelper.LoadAttachedDocuments(SessionManager.CurrentApplicantId.Value);
+                foreach (var doc in documents)
+                {
+                    _documents.Add(new AttachedDocument
+                    {
+                        Id = doc.Id,
+                        Number = _nextNumber++,
+                        DocumentType = doc.DocumentType,
+                        SeriesNumber = doc.SeriesNumber,
+                        Category = doc.Category,
+                        AdditionalData = doc.AdditionalData,
+                        IssueDate = doc.IssueDate,
+                        DocumentInfo = doc.DocumentInfo,
+                        AddedDate = doc.CreatedAt,
+                        AttachmentName = doc.AttachmentName,
+                        AttachmentPath = doc.AttachmentPath
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка загрузки документов: {ex.Message}", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                LoadSampleDocuments();
+            }
+        }
+
         private void LoadSampleDocuments()
         {
-            _documents.Add(new AttachedDocument
-            {
-                Number = _nextNumber++,
-                DocumentType = "Медицинская справка 086у",
-                SeriesNumber = "",
-                Category = "Абитуриент",
-                AdditionalData = "",
-                IssueDate = new DateTime(2023, 5, 15),
-                DocumentInfo = "док. выдан ООО МЦ \"Здоровье\"",
-                AddedDate = DateTime.Now.AddDays(-10),
-                AttachmentName = "med_certificate.pdf"
-            });
-
-            _documents.Add(new AttachedDocument
-            {
-                Number = _nextNumber++,
-                DocumentType = "СНИЛС",
-                SeriesNumber = "123-456-789 01",
-                Category = "Абитуриент",
-                AdditionalData = "",
-                IssueDate = null,
-                DocumentInfo = "Страховой номер индивидуального лицевого счета",
-                AddedDate = DateTime.Now.AddDays(-15),
-                AttachmentName = "snils.pdf"
-            });
-
-            _documents.Add(new AttachedDocument
-            {
-                Number = _nextNumber++,
-                DocumentType = "Фотография 3x4",
-                SeriesNumber = "",
-                Category = "Абитуриент",
-                AdditionalData = "4 шт.",
-                IssueDate = null,
-                DocumentInfo = "Фото на матовой бумаге",
-                AddedDate = DateTime.Now.AddDays(-5),
-                AttachmentName = "photo.jpg"
-            });
+            // Пустой список для новых абитуриентов
         }
 
         private void UploadFileButton_Click(object sender, RoutedEventArgs e)
@@ -169,24 +172,50 @@ namespace Admissions_Reserve.View
                 return;
             }
 
-            _documents.Add(new AttachedDocument
+            try
             {
-                Number = _nextNumber++,
-                DocumentType = DocumentTypeCombo.Text,
-                SeriesNumber = SeriesNumberTextBox.Text,
-                Category = (CategoryCombo.SelectedItem as ComboBoxItem)?.Content.ToString(),
-                AdditionalData = AdditionalDataTextBox.Text,
-                IssueDate = IssueDatePicker.SelectedDate,
-                DocumentInfo = DocumentInfoTextBox.Text,
-                AddedDate = DateTime.Now,
-                AttachmentName = _selectedAttachmentName,
-                AttachmentPath = _selectedAttachmentPath
-            });
+                int documentId = 0;
+                if (SessionManager.CurrentApplicant != null)
+                {
+                    documentId = DatabasePersistenceHelper.SaveAttachedDocument(
+                        SessionManager.CurrentApplicantId.Value,
+                        DocumentTypeCombo.Text,
+                        SeriesNumberTextBox.Text?.Trim(),
+                        (CategoryCombo.SelectedItem as ComboBoxItem)?.Content.ToString(),
+                        AdditionalDataTextBox.Text?.Trim(),
+                        IssueDatePicker.SelectedDate,
+                        DocumentInfoTextBox.Text?.Trim(),
+                        _selectedAttachmentPath,
+                        _selectedAttachmentName
+                    );
+                    DataService.LogChange("AttachedDocuments", documentId, "INSERT");
+                }
 
-            ClearForm();
+                _documents.Add(new AttachedDocument
+                {
+                    Id = documentId,
+                    Number = _nextNumber++,
+                    DocumentType = DocumentTypeCombo.Text,
+                    SeriesNumber = SeriesNumberTextBox.Text,
+                    Category = (CategoryCombo.SelectedItem as ComboBoxItem)?.Content.ToString(),
+                    AdditionalData = AdditionalDataTextBox.Text,
+                    IssueDate = IssueDatePicker.SelectedDate,
+                    DocumentInfo = DocumentInfoTextBox.Text,
+                    AddedDate = DateTime.Now,
+                    AttachmentName = _selectedAttachmentName,
+                    AttachmentPath = _selectedAttachmentPath
+                });
 
-            MessageBox.Show("Документ успешно добавлен", "Успех",
-                MessageBoxButton.OK, MessageBoxImage.Information);
+                ClearForm();
+
+                MessageBox.Show("Документ успешно добавлен", "Успех",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при сохранении документа: {ex.Message}", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void ClearForm()
@@ -219,8 +248,25 @@ namespace Admissions_Reserve.View
 
                 if (result == MessageBoxResult.Yes)
                 {
-                    _documents.Remove(item);
-                    RenumberDocuments();
+                    try
+                    {
+                        if (item.Id > 0 && SessionManager.CurrentApplicant != null)
+                        {
+                            DatabasePersistenceHelper.DeleteAttachedDocument(item.Id, SessionManager.CurrentApplicantId.Value);
+                            DataService.LogChange("AttachedDocuments", item.Id, "DELETE");
+                        }
+
+                        _documents.Remove(item);
+                        RenumberDocuments();
+
+                        MessageBox.Show("Документ удален", "Успех",
+                            MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Ошибка при удалении: {ex.Message}", "Ошибка",
+                            MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                 }
             }
         }

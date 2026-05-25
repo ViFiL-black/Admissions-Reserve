@@ -82,11 +82,13 @@ namespace Admissions_Reserve.View
         private ObservableCollection<CompetitionItem> _availableCompetitions;
         private ObservableCollection<CompetitionItem> _selectedCompetitions;
         private int _nextPriority = 1;
+        private bool isInitialized = false;
 
         public ApplicationCompetitionsPage()
         {
             InitializeComponent();
             InitializeData();
+            isInitialized = true;
         }
 
         private void InitializeData()
@@ -141,12 +143,14 @@ namespace Admissions_Reserve.View
 
         private void ApplyFilters_Click(object sender, RoutedEventArgs e)
         {
+            if (!isInitialized) return;
             // Здесь можно добавить логику фильтрации
             MessageBox.Show("Фильтры применены", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void AvailableCompetitionsGrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
+            if (!isInitialized) return;
             if (e.EditAction != DataGridEditAction.Commit) return;
 
             var item = e.Row.Item as CompetitionItem;
@@ -188,6 +192,8 @@ namespace Admissions_Reserve.View
 
         private void MoveUp_Click(object sender, RoutedEventArgs e)
         {
+            if (!isInitialized) return;
+
             var button = sender as Button;
             var item = button?.Tag as CompetitionItem;
 
@@ -204,6 +210,8 @@ namespace Admissions_Reserve.View
 
         private void MoveDown_Click(object sender, RoutedEventArgs e)
         {
+            if (!isInitialized) return;
+
             var button = sender as Button;
             var item = button?.Tag as CompetitionItem;
 
@@ -220,6 +228,8 @@ namespace Admissions_Reserve.View
 
         private void DeleteSelectedCompetition_Click(object sender, RoutedEventArgs e)
         {
+            if (!isInitialized) return;
+
             var button = sender as Button;
             var item = button?.Tag as CompetitionItem;
 
@@ -254,12 +264,14 @@ namespace Admissions_Reserve.View
 
         private void HasPrivilegeCheckBox_Checked(object sender, RoutedEventArgs e)
         {
+            if (!isInitialized) return;
             PrivilegeCategoryCombo.IsEnabled = true;
             PrivilegeDocumentsTextBox.IsEnabled = true;
         }
 
         private void HasPrivilegeCheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
+            if (!isInitialized) return;
             PrivilegeCategoryCombo.IsEnabled = false;
             PrivilegeDocumentsTextBox.IsEnabled = false;
             PrivilegeCategoryCombo.SelectedIndex = 0;

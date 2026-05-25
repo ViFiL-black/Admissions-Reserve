@@ -105,9 +105,15 @@
     <Compile Include="Model\Applicants.cs" />
     <Compile Include="Model\Core.cs" />
     <Compile Include="Model\DatabaseHelper.cs" />
+    <Compile Include="Model\DatabasePersistenceHelper.cs" />
     <Compile Include="Model\DataService.cs" />
+    <Compile Include="Model\ExportHelper.cs" />
+    <Compile Include="Model\FormattingHelper.cs" />
+    <Compile Include="Model\LogHelper.cs" />
     <Compile Include="Model\Model1.Context.cs" />
     <Compile Include="Model\Models.cs" />
+    <Compile Include="Model\PageModels.cs" />
+    <Compile Include="Model\ValidationHelper.cs" />
     <Compile Include="View\AdditionalInfoPage.xaml.cs">
       <DependentUpon>AdditionalInfoPage.xaml</DependentUpon>
     </Compile>
@@ -126,6 +132,7 @@
     <Compile Include="View\ContactsPage.xaml.cs">
       <DependentUpon>ContactsPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="View\Converters.cs" />
     <Compile Include="View\DocumentsPage.xaml.cs">
       <DependentUpon>DocumentsPage.xaml</DependentUpon>
     </Compile>

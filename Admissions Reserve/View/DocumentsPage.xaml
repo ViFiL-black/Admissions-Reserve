@@ -48,21 +48,9 @@
                                 <TextBlock Text="Тип документа" FontSize="11"/>
                                 <TextBlock Text="*" Foreground="Red" FontSize="11" FontWeight="Bold" Margin="2,0,0,0"/>
                             </StackPanel>
-                            <ComboBox x:Name="DocumentTypeCombo" Grid.Column="1" Height="23" FontSize="11" Margin="0,0,10,0" IsEditable="True">
-                                <ComboBoxItem Content="Паспорт гражданина РФ"/>
-                                <ComboBoxItem Content="Загранпаспорт"/>
-                                <ComboBoxItem Content="Свидетельство о рождении"/>
-                                <ComboBoxItem Content="Военный билет"/>
-                                <ComboBoxItem Content="Водительское удостоверение"/>
-                                <ComboBoxItem Content="Медицинская справка 086у"/>
-                                <ComboBoxItem Content="Полис ОМС"/>
-                                <ComboBoxItem Content="СНИЛС"/>
-                                <ComboBoxItem Content="ИНН"/>
-                                <ComboBoxItem Content="Фото 3x4"/>
-                                <ComboBoxItem Content="Признанный сертификат"/>
-                                <ComboBoxItem Content="Справка об инвалидности"/>
-                                <ComboBoxItem Content="Свидетельство о браке"/>
-                            </ComboBox>
+                            <!-- ComboBox с данными из БД -->
+                            <ComboBox x:Name="DocumentTypeCombo" Grid.Column="1" Height="23" FontSize="11" Margin="0,0,10,0" 
+                                      DisplayMemberPath="Name" SelectedValuePath="Id" IsEditable="False"/>
                             <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
                                 <TextBlock Text="Категория" FontSize="11"/>
                                 <TextBlock Text="*" Foreground="Red" FontSize="11" FontWeight="Bold" Margin="2,0,0,0"/>
@@ -217,13 +205,13 @@
 
                 <!-- ========== КНОПКИ НАВИГАЦИИ ========== -->
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,10">
-                    <Button x:Name="PrevButton" Content="Назад" Width="90" Height="32" Margin="0,0,10,0" FontSize="11" Background="#F0F0F0"/>
-                    <Button x:Name="NextButton" Content="Далее" Width="90" Height="32" Margin="0,0,10,0" FontSize="11" Background="#007ACC" Foreground="White"/>
-                    <Button x:Name="SaveButton" Content="Сохранить" Width="90" Height="32" Margin="0,0,10,0" FontSize="11" Background="#4CAF50" Foreground="White"/>
-                    <Button x:Name="CancelButton" Content="Отменить" Width="90" Height="32" FontSize="11" Background="#F0F0F0"/>
+                    <Button x:Name="PrevButton" Content="Назад" Width="90" Height="32" Margin="0,0,10,0" FontSize="11" Background="#F0F0F0" Click="PrevButton_Click"/>
+                    <Button x:Name="NextButton" Content="Далее" Width="90" Height="32" Margin="0,0,10,0" FontSize="11" Background="#007ACC" Foreground="White" Click="NextButton_Click"/>
+                    <Button x:Name="SaveButton" Content="Сохранить" Width="90" Height="32" Margin="0,0,10,0" FontSize="11" Background="#4CAF50" Foreground="White" Click="SaveButton_Click"/>
+                    <Button x:Name="CancelButton" Content="Отменить" Width="90" Height="32" FontSize="11" Background="#F0F0F0" Click="CancelButton_Click"/>
                 </StackPanel>
 
             </StackPanel>
         </ScrollViewer>
     </Grid>
-</Page>
+</Page> 

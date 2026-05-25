@@ -1,4 +1,3 @@
-// ContactsPage.xaml.cs
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +10,8 @@ namespace Admissions_Reserve.View
     public partial class ContactsPage : Page
     {
         private Applicants currentApplicant;
+        private bool isLoadingData = false;
+        private bool isInitialized = false;
 
         public ContactsPage()
         {
@@ -19,28 +20,23 @@ namespace Admissions_Reserve.View
 
             if (SessionManager.CurrentApplicant != null)
             {
-                // Обновляем данные из БД
+                // Загружаем актуальные данные из БД
                 currentApplicant = DataService.GetApplicant(SessionManager.CurrentApplicantId.Value);
                 if (currentApplicant != null)
                 {
                     SessionManager.CurrentApplicant = currentApplicant;
                     LoadApplicantData();
                 }
-                else
-                {
-                    MessageBox.Show("Сначала необходимо заполнить данные удостоверения личности",
-                        "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    if (NavigationService?.CanGoBack == true)
-                        NavigationService.GoBack();
-                }
             }
             else
             {
                 MessageBox.Show("Сначала необходимо заполнить данные удостоверения личности",
                     "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
+
                 if (NavigationService?.CanGoBack == true)
                     NavigationService.GoBack();
             }
+            isInitialized = true;
         }
 
         private void LoadReferenceData()
@@ -129,7 +125,13 @@ namespace Admissions_Reserve.View
                 if (!ValidateData())
                     return false;
 
-                // Получаем актуальные данные из БД
+                if (SessionManager.CurrentApplicantId == null)
+                {
+                    MessageBox.Show("Ошибка: данные абитуриента не найдены", "Ошибка",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    return false;
+                }
+
                 currentApplicant = DataService.GetApplicant(SessionManager.CurrentApplicantId.Value);
 
                 if (currentApplicant == null)
@@ -139,6 +141,7 @@ namespace Admissions_Reserve.View
                     return false;
                 }
 
+                // Сохраняем данные из формы
                 currentApplicant.Phone = ContactPhoneTextBox.Text?.Trim();
                 currentApplicant.MobilePhone = MobilePhoneTextBox.Text?.Trim();
                 currentApplicant.Fax = FaxTextBox.Text?.Trim();
@@ -167,13 +170,15 @@ namespace Admissions_Reserve.View
                 currentApplicant.ContactComment = CommentTextBox.Text?.Trim();
                 currentApplicant.UpdatedAt = DateTime.Now;
 
+                // Сохраняем в БД
                 DataService.UpdateApplicant(currentApplicant);
                 DataService.LogChange("Applicants", currentApplicant.Id, "UPDATE");
 
+                // Обновляем SessionManager
                 SessionManager.CurrentApplicant = currentApplicant;
 
-                MessageBox.Show($"Контактные данные успешно сохранены!\nID абитуриента: {currentApplicant.Id}\nБаза данных: {DatabaseHelper.GetDatabasePath()}",
-                    "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Контактные данные успешно сохранены!", "Успех",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
 
                 return true;
             }
@@ -187,6 +192,8 @@ namespace Admissions_Reserve.View
 
         private void CopyFromRegistration_Checked(object sender, RoutedEventArgs e)
         {
+            if (!isInitialized) return;
+
             try
             {
                 if (SessionManager.CurrentApplicantId == null || SessionManager.CurrentApplicantId == 0)
@@ -222,6 +229,11 @@ namespace Admissions_Reserve.View
                     MessageBoxButton.OK, MessageBoxImage.Error);
                 CopyFromRegistrationCheckBox.IsChecked = false;
             }
+        }
+
+        private void CopyFromRegistration_Unchecked(object sender, RoutedEventArgs e)
+        {
+            // Оставляем поля доступными для редактирования
         }
 
         private bool ValidateData()
@@ -281,31 +293,28 @@ namespace Admissions_Reserve.View
             }
         }
 
+        // Кнопка ДАЛЕЕ - переход на страницу образования
         private void NextButton_Click(object sender, RoutedEventArgs e)
         {
             if (SaveData())
             {
-                MessageBox.Show($"Все данные успешно сохранены!\nФайл базы данных: {DatabaseHelper.GetDatabasePath()}",
-                    "Готово", MessageBoxButton.OK, MessageBoxImage.Information);
-
-                SessionManager.Clear();
-
-                if (NavigationService?.CanGoBack == true)
-                {
-                    while (NavigationService.CanGoBack)
-                    {
-                        NavigationService.GoBack();
-                    }
-                }
+                // Переход на страницу "Вид заявления и образование"
+                NavigationService?.Navigate(new ApplicationTypeAndEducationPage());
             }
         }
 
+        // Кнопка НАЗАД - возврат на страницу удостоверения личности
         private void PrevButton_Click(object sender, RoutedEventArgs e)
         {
+            // Сохраняем данные перед возвратом
+            SaveData();
+
+            // Возвращаемся на предыдущую страницу
             if (NavigationService?.CanGoBack == true)
                 NavigationService.GoBack();
         }
 
+        // Кнопка ОТМЕНИТЬ
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
             var result = MessageBox.Show("Вы уверены, что хотите отменить ввод данных?\nВсе несохраненные данные будут потеряны.",
@@ -315,8 +324,10 @@ namespace Admissions_Reserve.View
             {
                 SessionManager.Clear();
 
+                // Закрываем приложение или возвращаемся на главную
                 if (NavigationService?.CanGoBack == true)
                 {
+                    // Возвращаемся назад несколько раз до главной страницы
                     while (NavigationService.CanGoBack)
                     {
                         NavigationService.GoBack();
@@ -324,7 +335,7 @@ namespace Admissions_Reserve.View
                 }
                 else
                 {
-                    Application.Current.Windows[0]?.Close();
+                    Application.Current.Shutdown();
                 }
             }
         }

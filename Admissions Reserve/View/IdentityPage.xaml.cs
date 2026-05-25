@@ -14,6 +14,7 @@ namespace Admissions_Reserve.View
         private IdentityDocuments currentIdentityDocument;
         private bool isNewApplicant = true;
         private bool isLoadingData = false;
+        private bool isInitialized = false;
 
         public IdentityPage()
         {
@@ -40,6 +41,7 @@ namespace Admissions_Reserve.View
                 SessionManager.CurrentApplicant = currentApplicant;
                 isNewApplicant = true;
             }
+            isInitialized = true;
         }
 
         private void LoadReferenceData()
@@ -387,7 +389,9 @@ namespace Admissions_Reserve.View
 
         private void ExistingIdentityCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (!isLoadingData && ExistingIdentityRadio != null && ExistingIdentityRadio.IsChecked == true)
+            if (!isInitialized || isLoadingData) return;
+
+            if (ExistingIdentityRadio != null && ExistingIdentityRadio.IsChecked == true)
             {
                 LoadSelectedIdentityDocument();
             }
@@ -395,22 +399,26 @@ namespace Admissions_Reserve.View
 
         private void SameAddressCheckBox_Checked(object sender, RoutedEventArgs e)
         {
+            if (!isInitialized) return;
             ActualAddressBorder.Visibility = Visibility.Collapsed;
         }
 
         private void SameAddressCheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
+            if (!isInitialized) return;
             ActualAddressBorder.Visibility = Visibility.Visible;
         }
 
         private void NoSnilsCheckBox_Checked(object sender, RoutedEventArgs e)
         {
+            if (!isInitialized) return;
             SnilsTextBox.IsEnabled = false;
             SnilsTextBox.Text = string.Empty;
         }
 
         private void NoSnilsCheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
+            if (!isInitialized) return;
             SnilsTextBox.IsEnabled = true;
         }
 
@@ -424,6 +432,8 @@ namespace Admissions_Reserve.View
 
         private void PrevButton_Click(object sender, RoutedEventArgs e)
         {
+            SaveData();
+
             if (NavigationService?.CanGoBack == true)
                 NavigationService.GoBack();
         }
@@ -438,6 +448,7 @@ namespace Admissions_Reserve.View
                 if (SessionManager.CurrentApplicantId.HasValue)
                 {
                     DataService.DeleteApplicant(SessionManager.CurrentApplicantId.Value);
+                    DataService.LogChange("Applicants", SessionManager.CurrentApplicantId.Value, "DELETE");
                 }
 
                 SessionManager.Clear();

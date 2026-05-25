@@ -13,6 +13,7 @@ namespace Admissions_Reserve.View
     {
         private Core core = new Core();
         private int? _currentApplicantId;
+        private bool isInitialized = false;
 
         // Коллекции для привязки
         private List<LanguageViewModel> _languagesList = new List<LanguageViewModel>();
@@ -43,6 +44,7 @@ namespace Admissions_Reserve.View
 
             // Загрузка данных абитуриента
             LoadApplicantAdditionalData();
+            isInitialized = true;
         }
 
         /// <summary>

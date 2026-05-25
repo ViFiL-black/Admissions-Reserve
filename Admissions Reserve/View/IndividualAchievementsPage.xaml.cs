@@ -5,6 +5,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
+using Admissions_Reserve.Model;
 
 namespace Admissions_Reserve.View
 {
@@ -13,6 +14,7 @@ namespace Admissions_Reserve.View
         // Модель индивидуального достижения
         public class IndividualAchievement : INotifyPropertyChanged
         {
+            public int Id { get; set; }
             private int _number;
             private string _category;
             private string _achievementName;
@@ -89,33 +91,42 @@ namespace Admissions_Reserve.View
             { "Иное", 0 }
         };
 
+        private bool isInitialized = false;
+
         public IndividualAchievementsPage()
         {
             InitializeComponent();
             InitializeData();
+            isInitialized = true;
         }
 
         private void InitializeData()
         {
             _achievements = new ObservableCollection<IndividualAchievement>();
-            AchievementsGrid.ItemsSource = _achievements;
 
-            // Добавляем пример данных
-            LoadSampleAchievements();
-            UpdateTotalPoints();
+            // Загружаем данные из БД если есть абитуриент
+            if (SessionManager.CurrentApplicant != null)
+            {
+                LoadAchievementsFromDatabase();
+            }
+
+            AchievementsGrid.ItemsSource = _achievements;
         }
 
-        private void LoadSampleAchievements()
+        private void LoadAchievementsFromDatabase()
         {
-            _achievements.Add(new IndividualAchievement
+            try
             {
-                Number = _nextNumber++,
-                Category = "Значок ГТО (золотой)",
-                AchievementName = "Золотой значок ГТО",
-                Year = "2025",
-                Points = 5,
-                DocumentName = "gto_certificate.pdf"
-            });
+                if (SessionManager.CurrentApplicantId == null) return;
+
+                // Для демонстрации используем пустой список
+                // В реальной реализации здесь будет загрузка из БД
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка загрузки данных: {ex.Message}", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void CategoryCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -181,7 +192,7 @@ namespace Admissions_Reserve.View
 
             // Проверка максимальной суммы баллов
             int currentTotal = _achievements.Sum(a => a.Points);
-            int maxPoints = 20; // Максимум за все достижения
+            int maxPoints = 20;
             if (currentTotal + points > maxPoints)
             {
                 MessageBox.Show($"Сумма баллов за индивидуальные достижения не может превышать {maxPoints}. " +
@@ -200,22 +211,46 @@ namespace Admissions_Reserve.View
                 achievementName = category;
             }
 
-            _achievements.Add(new IndividualAchievement
+            try
             {
-                Number = _nextNumber++,
-                Category = category,
-                AchievementName = achievementName,
-                Year = year,
-                Points = points,
-                DocumentName = string.IsNullOrEmpty(documentName) ? "Не загружен" : documentName,
-                DocumentPath = _uploadedFilePath
-            });
+                int achievementId = 0;
+                if (SessionManager.CurrentApplicant != null)
+                {
+                    achievementId = DatabasePersistenceHelper.SaveIndividualAchievement(
+                        SessionManager.CurrentApplicantId.Value,
+                        category,
+                        achievementName,
+                        year,
+                        points,
+                        string.IsNullOrEmpty(documentName) ? "Не загружен" : documentName,
+                        _uploadedFilePath
+                    );
+                    DataService.LogChange("IndividualAchievements", achievementId, "INSERT");
+                }
 
-            ClearForm();
-            UpdateTotalPoints();
+                _achievements.Add(new IndividualAchievement
+                {
+                    Id = achievementId,
+                    Number = _nextNumber++,
+                    Category = category,
+                    AchievementName = achievementName,
+                    Year = year,
+                    Points = points,
+                    DocumentName = string.IsNullOrEmpty(documentName) ? "Не загружен" : documentName,
+                    DocumentPath = _uploadedFilePath
+                });
 
-            MessageBox.Show("Достижение успешно добавлено", "Успех",
-                MessageBoxButton.OK, MessageBoxImage.Information);
+                ClearForm();
+                UpdateTotalPoints();
+
+                MessageBox.Show("Достижение успешно добавлено", "Успех",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при сохранении достижения: {ex.Message}", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void ClearForm()
@@ -245,9 +280,26 @@ namespace Admissions_Reserve.View
 
                 if (result == MessageBoxResult.Yes)
                 {
-                    _achievements.Remove(item);
-                    RenumberAchievements();
-                    UpdateTotalPoints();
+                    try
+                    {
+                        if (item.Id > 0 && SessionManager.CurrentApplicant != null)
+                        {
+                            DatabasePersistenceHelper.DeleteIndividualAchievement(item.Id, SessionManager.CurrentApplicantId.Value);
+                            DataService.LogChange("IndividualAchievements", item.Id, "DELETE");
+                        }
+
+                        _achievements.Remove(item);
+                        RenumberAchievements();
+                        UpdateTotalPoints();
+
+                        MessageBox.Show("Достижение удалено", "Успех",
+                            MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Ошибка при удалении: {ex.Message}", "Ошибка",
+                            MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                 }
             }
         }
@@ -267,7 +319,6 @@ namespace Admissions_Reserve.View
             int totalPoints = _achievements.Sum(a => a.Points);
             TotalPointsTextBlock.Text = totalPoints.ToString();
 
-            // Подсветка при достижении максимума
             if (totalPoints >= 20)
             {
                 TotalPointsTextBlock.Background = System.Windows.Media.Brushes.Green;
@@ -285,7 +336,6 @@ namespace Admissions_Reserve.View
 
         private void AchievementsGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // Можно добавить логику при выборе достижения
         }
     }
 }

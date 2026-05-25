@@ -28,13 +28,7 @@
                                 <TextBlock Text="Вид заявления" FontSize="11" FontWeight="SemiBold"/>
                                 <TextBlock Text="*" Foreground="Red" FontSize="11" FontWeight="Bold" Margin="2,0,0,0"/>
                             </StackPanel>
-                            <ComboBox x:Name="ApplicationTypeCombo" Grid.Column="1" Height="23" FontSize="11" SelectedIndex="0">
-                                <ComboBoxItem Content="Среднее профессиональное образование"/>
-                                <ComboBoxItem Content="Высшее образование - бакалавриат"/>
-                                <ComboBoxItem Content="Высшее образование - магистратура"/>
-                                <ComboBoxItem Content="Высшее образование - аспирантура"/>
-                                <ComboBoxItem Content="Высшее образование - ординатура"/>
-                            </ComboBox>
+                            <ComboBox x:Name="ApplicationTypeCombo" Grid.Column="1" Height="23" FontSize="11"/>
                         </Grid>
                         <CheckBox x:Name="FirstTimeEducationCheckBox" Content="Получает образование данного уровня впервые" FontSize="11"/>
                     </StackPanel>
@@ -46,19 +40,19 @@
                 <Border BorderBrush="#CCCCCC" BorderThickness="1" Margin="0,0,0,15" Padding="10" Background="#FAFAFA">
                     <StackPanel>
                         <TextBlock Text="Выберите документ об образовании:" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,8"/>
-                        <RadioButton x:Name="ExistingDocumentRadio" Content="Аттестат (имеющийся документ)" Margin="0,0,0,8" FontSize="11" IsChecked="True"/>
+                        <RadioButton x:Name="ExistingDocumentRadio" Content="Выбрать существующий документ" Margin="0,0,0,8" FontSize="11" IsChecked="True"
+                                     Checked="ExistingDocumentRadio_Checked"/>
 
                         <Border BorderBrush="#CCCCCC" BorderThickness="1" Margin="20,0,0,10" Padding="8" Background="White">
                             <StackPanel>
                                 <TextBlock Text="Ранее добавленные документы:" FontSize="10" Foreground="Gray" Margin="0,0,0,5"/>
-                                <ComboBox x:Name="ExistingDocumentsCombo" Height="23" FontSize="11" IsEnabled="True">
-                                    <ComboBoxItem Content="Аттестат о среднем общем образовании - 2023"/>
-                                    <ComboBoxItem Content="Диплом о среднем профессиональном образовании - 2020"/>
-                                </ComboBox>
+                                <ComboBox x:Name="ExistingDocumentsCombo" Height="23" FontSize="11" IsEnabled="True"
+                                          SelectionChanged="ExistingDocumentsCombo_SelectionChanged"/>
                             </StackPanel>
                         </Border>
 
-                        <RadioButton x:Name="NewDocumentRadio" Content="Создать новый документ" Margin="0,0,0,5" FontSize="11"/>
+                        <RadioButton x:Name="NewDocumentRadio" Content="Создать новый документ" Margin="0,0,0,5" FontSize="11"
+                                     Checked="NewDocumentRadio_Checked"/>
                     </StackPanel>
                 </Border>
 
@@ -73,13 +67,7 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Column="0" Text="Страна" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                            <ComboBox x:Name="CountryCombo" Grid.Column="1" Height="23" FontSize="11" SelectedIndex="0">
-                                <ComboBoxItem Content="Российская Федерация"/>
-                                <ComboBoxItem Content="Республика Беларусь"/>
-                                <ComboBoxItem Content="Республика Казахстан"/>
-                                <ComboBoxItem Content="Украина"/>
-                                <ComboBoxItem Content="Другое"/>
-                            </ComboBox>
+                            <ComboBox x:Name="CountryCombo" Grid.Column="1" Height="23" FontSize="11"/>
                         </Grid>
 
                         <Grid Margin="0,0,0,10">
@@ -121,31 +109,15 @@
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0" Margin="0,0,8,0">
                                 <TextBlock Text="Вид документа" FontSize="11" FontWeight="SemiBold"/>
-                                <ComboBox x:Name="DocumentTypeCombo" Height="23" FontSize="11" SelectedIndex="0">
-                                    <ComboBoxItem Content="Аттестат"/>
-                                    <ComboBoxItem Content="Диплом"/>
-                                    <ComboBoxItem Content="Свидетельство"/>
-                                </ComboBox>
+                                <ComboBox x:Name="DocumentTypeCombo" Grid.Column="1" Height="23" FontSize="11" SelectedIndex="0"/>
                             </StackPanel>
                             <StackPanel Grid.Column="1" Margin="0,0,8,0">
                                 <TextBlock Text="Уровень образования" FontSize="11" FontWeight="SemiBold"/>
-                                <ComboBox x:Name="EducationLevelCombo" Height="23" FontSize="11" SelectedIndex="0">
-                                    <ComboBoxItem Content="Среднее общее"/>
-                                    <ComboBoxItem Content="Среднее профессиональное"/>
-                                    <ComboBoxItem Content="Высшее - бакалавриат"/>
-                                    <ComboBoxItem Content="Высшее - магистратура"/>
-                                    <ComboBoxItem Content="Высшее - специалитет"/>
-                                </ComboBox>
+                                <ComboBox x:Name="EducationLevelCombo" Height="23" FontSize="11"/>
                             </StackPanel>
                             <StackPanel Grid.Column="2">
                                 <TextBlock Text="Уровень образования (по документу)" FontSize="11" FontWeight="SemiBold"/>
-                                <ComboBox x:Name="DocumentEducationLevelCombo" Height="23" FontSize="11" SelectedIndex="0">
-                                    <ComboBoxItem Content="Среднее общее"/>
-                                    <ComboBoxItem Content="Среднее профессиональное"/>
-                                    <ComboBoxItem Content="Высшее - бакалавриат"/>
-                                    <ComboBoxItem Content="Высшее - магистратура"/>
-                                    <ComboBoxItem Content="Высшее - специалитет"/>
-                                </ComboBox>
+                                <ComboBox x:Name="DocumentEducationLevelCombo" Height="23" FontSize="11"/>
                             </StackPanel>
                         </Grid>
 
@@ -196,15 +168,18 @@
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0" Margin="0,0,8,0">
                                 <TextBlock Text="Число оценок «Удовл.»" FontSize="11" FontWeight="SemiBold"/>
-                                <TextBox x:Name="SatisfactoryCountTextBox" Height="23" FontSize="11" Text="0"/>
+                                <TextBox x:Name="SatisfactoryCountTextBox" Height="23" FontSize="11" Text="0"
+                                         TextChanged="Grades_TextChanged"/>
                             </StackPanel>
                             <StackPanel Grid.Column="1" Margin="0,0,8,0">
                                 <TextBlock Text="Число оценок «Хорошо»" FontSize="11" FontWeight="SemiBold"/>
-                                <TextBox x:Name="GoodCountTextBox" Height="23" FontSize="11" Text="0"/>
+                                <TextBox x:Name="GoodCountTextBox" Height="23" FontSize="11" Text="0"
+                                         TextChanged="Grades_TextChanged"/>
                             </StackPanel>
                             <StackPanel Grid.Column="2">
                                 <TextBlock Text="Число оценок «Отлично»" FontSize="11" FontWeight="SemiBold"/>
-                                <TextBox x:Name="ExcellentCountTextBox" Height="23" FontSize="11" Text="0"/>
+                                <TextBox x:Name="ExcellentCountTextBox" Height="23" FontSize="11" Text="0"
+                                         TextChanged="Grades_TextChanged"/>
                             </StackPanel>
                         </Grid>
 
@@ -250,11 +225,7 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Column="0" Text="Форма получения документа" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                            <ComboBox x:Name="DocumentFormCombo" Grid.Column="1" Height="23" FontSize="11" SelectedIndex="0">
-                                <ComboBoxItem Content="Копия"/>
-                                <ComboBoxItem Content="Оригинал"/>
-                                <ComboBoxItem Content="Заверенная копия"/>
-                            </ComboBox>
+                            <ComboBox x:Name="DocumentFormCombo" Grid.Column="1" Height="23" FontSize="11"/>
                         </Grid>
 
                         <Grid>
@@ -271,9 +242,9 @@
 
                 <!-- ========== КНОПКИ НАВИГАЦИИ ========== -->
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,10">
-                    <Button x:Name="PrevButton" Content="Назад" Width="90" Height="32" Margin="0,0,10,0" FontSize="11" Background="#F0F0F0"/>
-                    <Button x:Name="NextButton" Content="Далее" Width="90" Height="32" Margin="0,0,10,0" FontSize="11" Background="#007ACC" Foreground="White"/>
-                    <Button x:Name="CancelButton" Content="Отменить" Width="90" Height="32" FontSize="11" Background="#F0F0F0"/>
+                    <Button x:Name="PrevButton" Content="Назад" Click="PrevButton_Click" Width="90" Height="32" Margin="0,0,10,0" FontSize="11" Background="#F0F0F0"/>
+                    <Button x:Name="NextButton" Content="Далее" Click="NextButton_Click" Width="90" Height="32" Margin="0,0,10,0" FontSize="11" Background="#007ACC" Foreground="White"/>
+                    <Button x:Name="CancelButton" Content="Отменить" Click="CancelButton_Click" Width="90" Height="32" FontSize="11" Background="#F0F0F0"/>
                 </StackPanel>
 
             </StackPanel>

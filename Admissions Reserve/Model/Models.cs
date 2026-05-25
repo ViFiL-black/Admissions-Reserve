@@ -303,24 +303,130 @@ namespace Admissions_Reserve.Model
         public string Name { get; set; }
     }
 
+    // ========== НОВЫЕ КЛАССЫ ДЛ Я НОВЫХ ТАБЛИЦ ==========
+
+    public partial class EducationDocuments
+    {
+        public int Id { get; set; }
+        public int ApplicantId { get; set; }
+        public int? ApplicationTypeId { get; set; }
+        public bool FirstTimeEducation { get; set; }
+        public int? CountryId { get; set; }
+        public string City { get; set; }
+        public string EducationalOrg { get; set; }
+        public int? DocumentTypeId { get; set; }
+        public int? EducationLevelId { get; set; }
+        public int? DocumentEducationLevelId { get; set; }
+        public string Series { get; set; }
+        public string Number { get; set; }
+        public DateTime? IssueDate { get; set; }
+        public DateTime? GraduationYear { get; set; }
+        public int SatisfactoryCount { get; set; }
+        public int GoodCount { get; set; }
+        public int ExcellentCount { get; set; }
+        public double AverageScore { get; set; }
+        public bool FrdoVerified { get; set; }
+        public string ScanFilePath { get; set; }
+        public int? DocumentFormId { get; set; }
+        public string OriginalOrganization { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+    }
+
+    public partial class ApplicationTypes
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+    }
+
+    public partial class EducationDocumentTypes
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+    }
+
     public partial class EducationLevels
     {
         public int Id { get; set; }
         public string Name { get; set; }
     }
 
-    public partial class EducationPrograms
+    public partial class DocumentForms
     {
         public int Id { get; set; }
         public string Name { get; set; }
     }
+
+    public partial class ApplicationPriorities
+    {
+        public int Id { get; set; }
+        public int ApplicantId { get; set; }
+        public int PriorityOrder { get; set; }
+        public string ProgramCode { get; set; }
+        public string ProgramName { get; set; }
+        public string StudyForm { get; set; }
+        public string EducationBase { get; set; }
+        public string Department { get; set; }
+        public string AdmissionType { get; set; }
+        public string Branch { get; set; }
+        public bool? IsSelected { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+    }
+
+    public partial class AttachedDocuments
+    {
+        public int Id { get; set; }
+        public int ApplicantId { get; set; }
+        public string DocumentName { get; set; }
+        public string DocumentType { get; set; }
+        public string FilePath { get; set; }
+        public int FileSize { get; set; }
+        public DateTime UploadedAt { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+    }
+
+    public partial class CompetitionPriorities
+    {
+        public int Id { get; set; }
+        public int ApplicantId { get; set; }
+        public string CompetitionName { get; set; }
+        public int PriorityOrder { get; set; }
+        public bool? IsSelected { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+    }
+
+    public partial class ContactInformation
+    {
+        public int Id { get; set; }
+        public int ApplicantId { get; set; }
+        public string ContactType { get; set; }
+        public string ContactValue { get; set; }
+        public bool IsPreferred { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+    }
+
+    // ========== ДОПОЛНИТЕЛЬНЫЕ СПРАВОЧНИКИ ==========
+
+    public partial class EducationPrograms
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Code { get; set; }
+    }
+
+    // Обновите класс PersonalDocumentTypes в Models.cs:
 
     public partial class PersonalDocumentTypes
     {
         public int Id { get; set; }
         public string Name { get; set; }
+        public int SortOrder { get; set; }
+        public bool IsActive { get; set; }
     }
-
     public partial class RelationDegrees
     {
         public int Id { get; set; }
@@ -330,7 +436,9 @@ namespace Admissions_Reserve.Model
     public partial class RelativeDocuments
     {
         public int Id { get; set; }
-        public int? RelativeId { get; set; }
+        public int RelativeId { get; set; }
+        public string DocumentType { get; set; }
+        public string DocumentNumber { get; set; }
     }
 
     public partial class StudyForms

@@ -36,17 +36,25 @@ namespace Admissions_Reserve.Model
         public virtual DbSet<ApplicationCompetitions> ApplicationCompetitions { get; set; }
         public virtual DbSet<ApplicationEducationDocuments> ApplicationEducationDocuments { get; set; }
         public virtual DbSet<ApplicationPrivileges> ApplicationPrivileges { get; set; }
+        public virtual DbSet<ApplicationPriorities> ApplicationPriorities { get; set; }
         public virtual DbSet<BaseEducationLevels> BaseEducationLevels { get; set; }
         public virtual DbSet<Branches> Branches { get; set; }
         public virtual DbSet<ChangeHistory> ChangeHistory { get; set; }
+        public virtual DbSet<CompetitionPriorities> CompetitionPriorities { get; set; }
         public virtual DbSet<Competitions> Competitions { get; set; }
+        public virtual DbSet<ContactInformation> ContactInformation { get; set; }
         public virtual DbSet<CostReimbursementTypes> CostReimbursementTypes { get; set; }
         public virtual DbSet<Departments> Departments { get; set; }
         public virtual DbSet<DocumentCategories> DocumentCategories { get; set; }
         public virtual DbSet<DocumentReceiptForms> DocumentReceiptForms { get; set; }
         public virtual DbSet<EducationalOrganizations> EducationalOrganizations { get; set; }
+        public virtual DbSet<EducationDocuments> EducationDocuments { get; set; }
+        public virtual DbSet<EducationDocumentTypes> EducationDocumentTypes { get; set; }
         public virtual DbSet<EducationLevels> EducationLevels { get; set; }
         public virtual DbSet<EducationPrograms> EducationPrograms { get; set; }
+        public virtual DbSet<DocumentForms> DocumentForms { get; set; }
+        public virtual DbSet<ApplicationTypes> ApplicationTypes { get; set; }
+        public virtual DbSet<AttachedDocuments> AttachedDocuments { get; set; }
         public virtual DbSet<PersonalDocumentTypes> PersonalDocumentTypes { get; set; }
         public virtual DbSet<RelationDegrees> RelationDegrees { get; set; }
         public virtual DbSet<RelativeDocuments> RelativeDocuments { get; set; }

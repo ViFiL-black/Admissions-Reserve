@@ -80,12 +80,14 @@ namespace Admissions_Reserve.View
         private ObservableCollection<PriorityItem> _priorities;
         private Point _dragStartPoint;
         private PriorityItem _draggedItem;
+        private bool isInitialized = false;
 
         public PrioritiesPage()
         {
             InitializeComponent();
             InitializeData();
             SetupDragDrop();
+            isInitialized = true;
         }
 
         private void InitializeData()
@@ -169,6 +171,8 @@ namespace Admissions_Reserve.View
         // Перетаскивание строк
         private void PrioritiesGrid_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+            if (!isInitialized) return;
+            
             _dragStartPoint = e.GetPosition(null);
             var hit = VisualTreeHelper.HitTest(PrioritiesGrid, e.GetPosition(PrioritiesGrid));
             var row = FindVisualParent<DataGridRow>(hit.VisualHit);
@@ -181,6 +185,8 @@ namespace Admissions_Reserve.View
 
         private void PrioritiesGrid_PreviewMouseMove(object sender, MouseEventArgs e)
         {
+            if (!isInitialized) return;
+            
             if (e.LeftButton == MouseButtonState.Pressed && _draggedItem != null)
             {
                 Point currentPoint = e.GetPosition(null);
@@ -211,6 +217,8 @@ namespace Admissions_Reserve.View
 
         private void PrioritiesGrid_Drop(object sender, DragEventArgs e)
         {
+            if (!isInitialized) return;
+            
             var targetItem = GetItemAtDropPosition(e.GetPosition(PrioritiesGrid));
             var draggedItem = e.Data.GetData("PriorityItem") as PriorityItem;
 
@@ -237,6 +245,8 @@ namespace Admissions_Reserve.View
         // Кнопка перемещения вверх
         private void MoveUp_Click(object sender, RoutedEventArgs e)
         {
+            if (!isInitialized) return;
+
             var button = sender as Button;
             var item = button?.Tag as PriorityItem;
 
@@ -254,6 +264,8 @@ namespace Admissions_Reserve.View
         // Кнопка перемещения вниз
         private void MoveDown_Click(object sender, RoutedEventArgs e)
         {
+            if (!isInitialized) return;
+
             var button = sender as Button;
             var item = button?.Tag as PriorityItem;
 
