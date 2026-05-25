@@ -317,5 +317,98 @@ namespace Admissions_Reserve.View
             }
             _nextNumber = number;
         }
+
+        // Сохранение данных в БД
+        private bool SaveData()
+        {
+            try
+            {
+                if (SessionManager.CurrentApplicantId == null)
+                {
+                    MessageBox.Show("Ошибка: данные абитуриента не найдены", "Ошибка",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    return false;
+                }
+
+                // Данные сохраняются при добавлении каждого документа
+                MessageBox.Show("Данные о прикрепленных документах уже сохранены!", "Успех",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при сохранении данных: {ex.Message}", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+        }
+
+        // Кнопка ДАЛЕЕ - переход на страницу дополнительной информации
+        private async void NextButton_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as Button;
+            if (button != null)
+            {
+                button.IsEnabled = false;
+            }
+
+            try
+            {
+                if (SaveData())
+                {
+                    await System.Threading.Tasks.Task.Delay(100);
+                    NavigationService?.Navigate(new AdditionalInfoPage());
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при переходе: {ex.Message}", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                if (button != null)
+                {
+                    button.IsEnabled = true;
+                }
+            }
+        }
+
+        // Кнопка НАЗАД - возврат на страницу приоритетов
+        private void PrevButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (NavigationService?.CanGoBack == true)
+                NavigationService.GoBack();
+        }
+
+        // Кнопка ОТМЕНИТЬ
+        private void CancelButton_Click(object sender, RoutedEventArgs e)
+        {
+            var result = MessageBox.Show("Вы уверены, что хотите отменить ввод данных?\nВсе несохраненные данные будут потеряны.",
+                "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                SessionManager.Clear();
+
+                var mainWindow = Application.Current.MainWindow as MainWindow;
+                if (mainWindow != null)
+                {
+                    mainWindow.MainFrame.Navigate(new WelcomePage());
+                }
+                else if (NavigationService?.CanGoBack == true)
+                {
+                    while (NavigationService.CanGoBack)
+                    {
+                        NavigationService.GoBack();
+                    }
+                }
+                else
+                {
+                    Application.Current.Shutdown();
+                }
+            }
+        }
     }
 }

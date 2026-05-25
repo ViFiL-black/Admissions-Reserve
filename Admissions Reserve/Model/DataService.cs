@@ -687,6 +687,48 @@ namespace Admissions_Reserve.Model
             }
         }
 
+        public static void UpdateRelative(int id, int applicantId, string inn, string relationDegree, string lastName, 
+                                          string firstName, string patronymic, DateTime? birthDate, string phone, 
+                                          string email, string workplace, string position)
+        {
+            using (var connection = DatabaseHelper.GetConnection())
+            {
+                var query = @"UPDATE Relatives SET 
+                    ApplicantId = @ApplicantId,
+                    Inn = @Inn,
+                    RelationDegree = @RelationDegree,
+                    LastName = @LastName,
+                    FirstName = @FirstName,
+                    Patronymic = @Patronymic,
+                    BirthDate = @BirthDate,
+                    Phone = @Phone,
+                    Email = @Email,
+                    WorkPlace = @WorkPlace,
+                    Position = @Position,
+                    UpdatedAt = @UpdatedAt
+                WHERE Id = @Id";
+
+                using (var cmd = new SQLiteCommand(query, connection))
+                {
+                    cmd.Parameters.AddWithValue("@Id", id);
+                    cmd.Parameters.AddWithValue("@ApplicantId", applicantId);
+                    cmd.Parameters.AddWithValue("@Inn", (object)inn ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@RelationDegree", (object)relationDegree ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@LastName", (object)lastName ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@FirstName", (object)firstName ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Patronymic", (object)patronymic ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@BirthDate", (object)birthDate?.ToString("yyyy-MM-dd") ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Phone", (object)phone ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Email", (object)email ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@WorkPlace", (object)workplace ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Position", (object)position ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@UpdatedAt", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
         // ========== МЕТОДЫ ДЛЯ ЯЗЫКОВ АБИТУРИЕНТА ==========
 
         public static int CreateApplicantLanguage(int applicantId, int languageId, int languageLevelId, bool isPrimary = false)
@@ -750,6 +792,29 @@ namespace Admissions_Reserve.Model
                 using (var cmd = new SQLiteCommand(query, connection))
                 {
                     cmd.Parameters.AddWithValue("@Id", languageId);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public static void UpdateApplicantLanguage(ApplicantLanguages language)
+        {
+            using (var connection = DatabaseHelper.GetConnection())
+            {
+                var query = @"UPDATE ApplicantLanguages SET 
+                    LanguageId = @LanguageId,
+                    LanguageLevelId = @LanguageLevelId,
+                    IsPrimary = @IsPrimary,
+                    UpdatedAt = @UpdatedAt
+                WHERE Id = @Id";
+
+                using (var cmd = new SQLiteCommand(query, connection))
+                {
+                    cmd.Parameters.AddWithValue("@Id", language.Id);
+                    cmd.Parameters.AddWithValue("@LanguageId", (object)language.LanguageId ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@LanguageLevelId", (object)language.LanguageLevelId ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@IsPrimary", (object)language.IsPrimary ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@UpdatedAt", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
                     cmd.ExecuteNonQuery();
                 }
             }
@@ -825,6 +890,31 @@ namespace Admissions_Reserve.Model
             }
         }
 
+        public static void UpdateSportAchievement(SportAchievements achievement)
+        {
+            using (var connection = DatabaseHelper.GetConnection())
+            {
+                var query = @"UPDATE SportAchievements SET 
+                    SportType = @SportType,
+                    Achievement = @Achievement,
+                    Rank = @Rank,
+                    Year = @Year,
+                    UpdatedAt = @UpdatedAt
+                WHERE Id = @Id";
+
+                using (var cmd = new SQLiteCommand(query, connection))
+                {
+                    cmd.Parameters.AddWithValue("@Id", achievement.Id);
+                    cmd.Parameters.AddWithValue("@SportType", (object)achievement.SportType ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Achievement", (object)achievement.Achievement ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Rank", (object)achievement.Rank ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Year", (object)achievement.Year ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@UpdatedAt", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
         // ========== МЕТОДЫ ДЛЯ ИНДИВИДУАЛЬНЫХ ДОСТИЖЕНИЙ ==========
 
         public static int CreateIndividualAchievement(int applicantId, string achievement)
@@ -884,6 +974,25 @@ namespace Admissions_Reserve.Model
                 using (var cmd = new SQLiteCommand(query, connection))
                 {
                     cmd.Parameters.AddWithValue("@Id", achievementId);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public static void UpdateIndividualAchievement(IndividualAchievements achievement)
+        {
+            using (var connection = DatabaseHelper.GetConnection())
+            {
+                var query = @"UPDATE IndividualAchievements SET 
+                    Achievement = @Achievement,
+                    UpdatedAt = @UpdatedAt
+                WHERE Id = @Id";
+
+                using (var cmd = new SQLiteCommand(query, connection))
+                {
+                    cmd.Parameters.AddWithValue("@Id", achievement.Id);
+                    cmd.Parameters.AddWithValue("@Achievement", (object)achievement.Achievement ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@UpdatedAt", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
                     cmd.ExecuteNonQuery();
                 }
             }

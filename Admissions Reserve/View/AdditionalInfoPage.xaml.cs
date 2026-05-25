@@ -404,21 +404,23 @@ namespace Admissions_Reserve.View
             {
                 if (_currentApplicantId == null)
                 {
-                    var newApplicant = new Applicants();
+                    var newApplicant = new Applicants
+                    {
+                        CreatedAt = DateTime.Now,
+                        UpdatedAt = DateTime.Now
+                    };
                     FillApplicantData(newApplicant);
-                    core.context.Applicants.Add(newApplicant);
-                    core.context.SaveChanges();
-                    _currentApplicantId = newApplicant.Id;
+                    _currentApplicantId = DataService.CreateApplicant(newApplicant);
                 }
                 else
                 {
-                    var applicant = core.context.Applicants.FirstOrDefault(a => a.Id == _currentApplicantId);
+                    var applicant = DataService.GetApplicant(_currentApplicantId.Value);
                     if (applicant != null)
                     {
                         FillApplicantData(applicant);
                         applicant.UpdatedAt = DateTime.Now;
+                        DataService.UpdateApplicant(applicant);
                     }
-                    core.context.SaveChanges();
                 }
 
                 SaveLanguages(_currentApplicantId.Value);
@@ -511,13 +513,15 @@ namespace Admissions_Reserve.View
 
         private void SaveLanguages(int applicantId)
         {
-            var existingLanguages = core.context.ApplicantLanguages
-                .Where(al => al.ApplicantId == applicantId).ToList();
+            var existingLanguages = DataService.GetApplicantLanguages(applicantId);
 
             var keptIds = _languagesList.Where(l => l.Id > 0).Select(l => l.Id).ToList();
 
             var toDelete = existingLanguages.Where(el => !keptIds.Contains(el.Id)).ToList();
-            core.context.ApplicantLanguages.RemoveRange(toDelete);
+            foreach (var lang in toDelete)
+            {
+                DataService.DeleteApplicantLanguage(lang.Id);
+            }
 
             foreach (var langVM in _languagesList)
             {
@@ -529,33 +533,31 @@ namespace Admissions_Reserve.View
                         existing.LanguageId = langVM.LanguageId;
                         existing.LanguageLevelId = langVM.LevelId;
                         existing.IsPrimary = langVM.IsPrimary;
+                        DataService.UpdateApplicantLanguage(existing);
                     }
                 }
                 else
                 {
-                    var newLang = new ApplicantLanguages
-                    {
-                        ApplicantId = applicantId,
-                        LanguageId = langVM.LanguageId,
-                        LanguageLevelId = langVM.LevelId,
-                        IsPrimary = langVM.IsPrimary
-                    };
-                    core.context.ApplicantLanguages.Add(newLang);
+                    DataService.CreateApplicantLanguage(
+                        applicantId, 
+                        langVM.LanguageId.GetValueOrDefault(), 
+                        langVM.LevelId.GetValueOrDefault(), 
+                        langVM.IsPrimary.GetValueOrDefault());
                 }
             }
-
-            core.context.SaveChanges();
         }
 
         private void SaveSportAchievements(int applicantId)
         {
-            var existingSports = core.context.SportAchievements
-                .Where(s => s.ApplicantId == applicantId).ToList();
+            var existingSports = DataService.GetApplicantSportAchievements(applicantId);
 
             var keptIds = _sportsList.Where(s => s.Id > 0).Select(s => s.Id).ToList();
 
             var toDelete = existingSports.Where(es => !keptIds.Contains(es.Id)).ToList();
-            core.context.SportAchievements.RemoveRange(toDelete);
+            foreach (var sport in toDelete)
+            {
+                DataService.DeleteSportAchievement(sport.Id);
+            }
 
             foreach (var sportVM in _sportsList)
             {
@@ -567,22 +569,19 @@ namespace Admissions_Reserve.View
                         existing.SportType = sportVM.SportType;
                         existing.Rank = sportVM.Rank;
                         existing.Year = sportVM.Year;
+                        DataService.UpdateSportAchievement(existing);
                     }
                 }
                 else
                 {
-                    var newSport = new SportAchievements
-                    {
-                        ApplicantId = applicantId,
-                        SportType = sportVM.SportType,
-                        Rank = sportVM.Rank,
-                        Year = sportVM.Year
-                    };
-                    core.context.SportAchievements.Add(newSport);
+                    DataService.CreateSportAchievement(
+                        applicantId,
+                        sportVM.SportType,
+                        sportVM.Achievement,
+                        sportVM.Rank,
+                        sportVM.Year);
                 }
             }
-
-            core.context.SaveChanges();
         }
 
         private string FormatSnilsWithSpace(string snils)
@@ -837,6 +836,7 @@ namespace Admissions_Reserve.View
         {
             public int Id { get; set; }
             public string SportType { get; set; }
+            public string Achievement { get; set; }
             public string Rank { get; set; }
             public int? Year { get; set; }
         }
